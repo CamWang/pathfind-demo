@@ -5,7 +5,7 @@ import trace from "../data/grid-astar.trace.json"
 export function View() {
   return (
     <>
-      <PlanarRenderer searchTrace={trace}/>
+      <PlanarRenderer searchTrace={trace} />
     </>
   )
 }
