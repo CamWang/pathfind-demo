@@ -1,9 +1,9 @@
-import { Graphics, Stage, useApp } from "@inlet/react-pixi";
+import { Graphics, Stage } from "@inlet/react-pixi";
 import { Graphics as GraphicsType } from "@pixi/graphics";
-import { useCallback, useEffect } from "react";
-import { RenderProps, SearchTrace, Component, Event } from "./types";
-import { LineData, RectData, CircleData, Generic2DIntrinsicComponent } from "./PlanarTypes";
+import { useCallback } from "react";
+import {  Component, Event } from "./types";
 
+// default context
 const context = {
   current: null,
   parent: null,
@@ -12,6 +12,7 @@ const context = {
     source: 0x26a69a,
     destination: 0xf06292,
     expanding: 0xff5722,
+    updating: 0xff5722,
     generating: 0xffeb3b,
     closing: 0xb0bec5,
     end: 0xec407a,
@@ -45,11 +46,23 @@ function rectDrawingCoverter(component:Component){
         component[prop] = component[prop](event);
       }
     }
+    let color;
+    if (event.type in context.colour) {
+      color = context.colour[event.type as keyof typeof context.colour];
+    }
+    if (!color) {
+      console.dir(event.type);
+    }
 
     g
-      .beginFill(component.fill??0xff5722, component.alpha??context.alpha)
+      .beginFill(
+        event.fill??component.fill??color??0xff5722, 
+        event.alpha??component.alpha??context.alpha)
       .drawRect(
-        scale(component.x), scale(component.y), scale(component.width??1), scale(component.height??1)
+        scale(event.x??component.x), 
+        scale(event.y??component.y), 
+        scale(event.width??component.width??1), 
+        scale(event.height??component.height??1)
       )
       .endFill();
   }
@@ -60,9 +73,6 @@ export function D2Renderer({parsedComps, eventList}:D2RendererProps) {
   /**
    * TODO style the source and destination node
    */
-
-  
-
   const inComps:InstrinsicComponentsStuff = {"rect": (comp:Component) => rectDrawingCoverter(comp)}
 
   const drawInstructions = parsedComps.map((ele:Component) => {
@@ -73,7 +83,7 @@ export function D2Renderer({parsedComps, eventList}:D2RendererProps) {
     for (const event of eventList) {
       drawInstructions.forEach((instr:DrawingInstruction)=>instr(g, event))
     }
-  }, [eventList]);
+  }, [eventList, drawInstructions]);
 
   return (
     <Stage options={{backgroundAlpha: 0}} >

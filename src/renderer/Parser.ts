@@ -21,7 +21,6 @@ export function parseViews(renderDef: Render): Views {
   for (const viewName in views) {
     views[viewName] = parseComps(views[viewName], userContext, userComp)
   }
-  console.dir(views.main);
   return views;
 }
 
@@ -119,6 +118,7 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
   }
 
   return (context: Context) =>
+    // eslint-disable-next-line no-new-func
     Function("context", `return ${val}`)
       ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
 }
@@ -135,9 +135,6 @@ export function isComputedProp(val: any): boolean {
       val = JSON.stringify(val);
     }
     let re = /{{(.*?)}}/g;
-    console.log("HELLO");
-    
-    console.log(val);
     const arr = [...val.matchAll(re)];
     return arr.length !== 0;
   }
