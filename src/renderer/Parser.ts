@@ -130,7 +130,7 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
  * @returns True if the computed property includes "{{}}", False otherwise
  */
 export function isComputedProp(val: any): boolean {
-  if (val){
+  if (val && typeof val !== "function"){
     if (typeof val !== "string") {
       val = JSON.stringify(val);
     }
