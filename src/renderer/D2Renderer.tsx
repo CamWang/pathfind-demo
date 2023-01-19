@@ -1,7 +1,7 @@
 import { Graphics, Stage } from "@inlet/react-pixi";
 import { Graphics as GraphicsType } from "@pixi/graphics";
 import { useCallback } from "react";
-import {  Component, Event } from "./types";
+import {  Component, Event, View } from "./types";
 
 // default context
 const context = {
@@ -24,10 +24,8 @@ const context = {
 
 type DrawingInstruction = (g:GraphicsType, event:Event) => void;
 
-type InstrinsicComponentsStuff = {[key:string]: (comp:Component) => DrawingInstruction}
-
 type D2RendererProps = {
-  parsedComps: Component[],
+  parsedComps: View,
   eventList: Event[]
 }
 
@@ -36,17 +34,43 @@ const scale = (length: number): number => {
   return length * context.scale;
 }
 
+export const D2InstrinsicComponents:InstrinsicComponents = {
+  "rect": {
+    "converter" : (comp:Component) => rectDrawingCoverter(comp),
+    "renderer" : "2D",
+  },
+  "circle" : {
+    "converter" : (comp:Component) => circleDrawingCoverter(comp),
+    "renderer" : "2D",
+  }
+}
+
+type InstrinsicComponents = {
+  [key:string]: {"converter" : (comp:Component)=>DrawingInstruction,
+                 "renderer": string}
+}
+
+function circleDrawingCoverter(component:Component){
+
+  return (g:GraphicsType, event:Event) => {}
+}
 
 function rectDrawingCoverter(component:Component){
+
   
   return (g:GraphicsType, event:Event) => {
-
     for (const prop in component){
       if (typeof component[prop] == "function"){
         component[prop] = component[prop](event);
       }
     }
+    if (event=== undefined){
+      console.log("hmm")
+    }
+    else{
+      console.log(event)
     let color;
+
     if (event.type in context.colour) {
       color = context.colour[event.type as keyof typeof context.colour];
     }
@@ -65,7 +89,7 @@ function rectDrawingCoverter(component:Component){
         scale(event.height??component.height??1)
       )
       .endFill();
-  }
+  }}
 }
 
 
@@ -73,10 +97,9 @@ export function D2Renderer({parsedComps, eventList}:D2RendererProps) {
   /**
    * TODO style the source and destination node
    */
-  const inComps:InstrinsicComponentsStuff = {"rect": (comp:Component) => rectDrawingCoverter(comp)}
 
-  const drawInstructions = parsedComps.map((ele:Component) => {
-    return inComps[ele["$"]](ele);
+  const drawInstructions = parsedComps["components"].map((ele:Component) => {
+    return D2InstrinsicComponents[ele["$"]]["converter"](ele);
   })
 
   const draw = useCallback((g: GraphicsType) => {

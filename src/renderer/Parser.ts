@@ -1,12 +1,10 @@
-import { Render, Components, Component, Views, Context } from "./types"
-
+import { Render, Components, Component, Views, Context, View } from "./types"
+import {primitiveComponents} from "./PrimitiveComponents"
 /**
  * @todo Error handling for missing required fields
  * Convert more of the old formats
  * Documentation on how to format your render section of the Search Trace
  */
-
-const primtivesComponents = { "rect": {}}
 
 /**
  * Parses all reviews in a Render
@@ -19,8 +17,21 @@ export function parseViews(renderDef: Render): Views {
   const userContext = renderDef.context ? renderDef.context : {}
 
   for (const viewName in views) {
-    views[viewName] = parseComps(views[viewName], userContext, userComp)
+    views[viewName]["components"] = parseComps(views[viewName]["components"], userContext, userComp)
   }
+
+  // checks if all the components are of the right renderer
+  for (const viewName in views){
+    const view: View = views[viewName]
+    for (const componentName in view["components"]){
+      const component = view["components"][componentName]
+      if (component["renderer"] !== view["renderer"]){
+        // raise error
+        console.log("TODO: INVALID COMPONENTS FOR A RENDER")
+      }
+    }
+  }
+
   return views;
 }
 
@@ -42,9 +53,9 @@ export function parseComps(components: Component[], injectedContext: Context, us
   function parseComp(component: Component): Component[] {
 
     // Checks to see if the name of the component matches a primitive
-    if (component["$"] in primtivesComponents) {
+    if (component["$"] in primitiveComponents) {
       // creates a copy of the component
-      const newComp: Component = { ...injectedContext, ...component }
+      const newComp: Component = { ...injectedContext, ...component}
 
       // goes through all the properties of the component and parses them when necessary
       for (const prop in component) {
@@ -52,14 +63,14 @@ export function parseComps(components: Component[], injectedContext: Context, us
           newComp[prop as keyof Component] = parseComputedProp(component[prop as keyof Component], injectedContext)
         }
       }
-      return [newComp]
+      return [{...newComp, ...primitiveComponents[component["$"] as keyof Object]}]
     }
 
     // Checks to see if the name of the component matches a user defined component
     else if (component["$"] in userComponents) {
 
       // When an user component need to recurse down and parse that user defined component
-      return parseComps(userComponents[component["$"] as keyof object],
+      return parseComps(userComponents[component["$"] as keyof Object],
         { ...injectedContext, ...component }, userComponents)
     }
 

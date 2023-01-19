@@ -15,11 +15,7 @@
       ]
     },
     "views": {
-      "main": [
-        {
-          "$": "tile"
-        }
-      ]
+      "main": { "renderer": "2D", "components" :[{"$": "tile"} ] }
     }
   },
   "eventList": [

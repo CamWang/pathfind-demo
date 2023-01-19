@@ -329,12 +329,13 @@ test("parseViews TC1 - Tile View", () => {
       ]
     },
     "views": {
-      "tiles": [{ "$":"tileboard" }],
-      "main": [{ "$": "tree" }]
+      "tiles": {"renderer": "2D", "components":[ { "$":"tileboard" }]},
+      "main": {"renderer": "2D", "components":[{ "$": "tree" }]}
     }
   });
   const arr = [];
-  for (const comp of views.tiles) {
+  console.log(views)
+  for (const comp of views.tiles.components) {
     expect(comp["$"]).toBe("rect");
     expect(comp.height).toBe(1);
     expect(comp.width).toBe(1);

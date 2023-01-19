@@ -52,8 +52,13 @@ export type Components = {
 }
 
 export type Views = {
-  main: Component[];
-  [K: string]: Component[]
+  main: View;
+  [K: string]: View
+}
+
+export type View = {
+  renderer: string,
+  components: Component[]
 }
 
 export type Render = {
