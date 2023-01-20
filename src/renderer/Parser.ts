@@ -6,6 +6,7 @@ import {primitiveComponents} from "./PrimitiveComponents"
  * Documentation on how to format your render section of the Search Trace
  */
 
+
 /**
  * Parses all reviews in a Render
  * @param renderDef the render which contains the views to be parsed

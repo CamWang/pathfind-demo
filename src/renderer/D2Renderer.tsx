@@ -1,7 +1,9 @@
 import { Graphics, Stage } from "@inlet/react-pixi";
-import { Graphics as GraphicsType } from "@pixi/graphics";
+import { Graphics as GraphicsType,  } from "@pixi/graphics";
 import { useCallback } from "react";
 import {  Component, Event, View } from "./types";
+import {DrawingInstruction, InstrinsicComponents} from "./PrimitiveComponents"
+import * as PIXI from 'pixi.js';
 
 // default context
 const context = {
@@ -22,13 +24,11 @@ const context = {
   alpha: 1,
 }
 
-type DrawingInstruction = (g:GraphicsType, event:Event) => void;
 
 type D2RendererProps = {
   parsedComps: View,
   eventList: Event[]
 }
-
 
 const scale = (length: number): number => {
   return length * context.scale;
@@ -45,10 +45,6 @@ export const D2InstrinsicComponents:InstrinsicComponents = {
   }
 }
 
-type InstrinsicComponents = {
-  [key:string]: {"converter" : (comp:Component)=>DrawingInstruction,
-                 "renderer": string}
-}
 
 function circleDrawingCoverter(component:Component){
 
@@ -78,7 +74,8 @@ function rectDrawingCoverter(component:Component){
       console.dir(event.type);
     }
 
-    g
+    const rect = new PIXI.Graphics()
+    rect
       .beginFill(
         event.fill??component.fill??color??0xff5722, 
         event.alpha??component.alpha??context.alpha)
@@ -89,6 +86,17 @@ function rectDrawingCoverter(component:Component){
         scale(event.height??component.height??1)
       )
       .endFill();
+    console.log(component)
+    var buttonText = new PIXI.Text(component.text,
+    {
+        fontFamily : 'Arial',
+        fontSize: 10,
+        fill : "black",
+    });
+    buttonText.y = scale(event.y??component.y)
+    buttonText.x = scale(event.x??component.x);
+    rect.addChild(buttonText);
+    g.addChild(rect)
   }}
 }
 
