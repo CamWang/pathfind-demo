@@ -1393,7 +1393,7 @@ const tile_events = {
 
 export function converter(){
   const newEventList = [];
-  const array = ["11", "12", "13", "21", "22", "23", "31", "32", "33"]
+  const array = ["11", "21", "31", "12", "22", "32", "13", "23", "33"]
   for (const eventName in tile_events.eventList){
     let currentEvent = tile_events.eventList[eventName]
     const newObject:{[key: string] : any} = {}

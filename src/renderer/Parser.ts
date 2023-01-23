@@ -1,11 +1,26 @@
 import { Render, Components, Component, Views, Context, View } from "./types"
 import {primitiveComponents} from "./PrimitiveComponents"
+
 /**
  * @todo Error handling for missing required fields
  * Convert more of the old formats
  * Documentation on how to format your render section of the Search Trace
  */
 
+// 1. import all the supported components in each of the renderers
+/**
+ * il = {
+ *  d2renderer: [
+ *    Object, Object, Object
+ *  ],
+ *  d3renderer: [
+ *    Object, 
+ *  ]
+ * }
+ */
+
+
+let renderName:string;
 
 /**
  * Parses all reviews in a Render
@@ -17,20 +32,10 @@ export function parseViews(renderDef: Render): Views {
   const userComp = renderDef.components ? renderDef.components : {}
   const userContext = renderDef.context ? renderDef.context : {}
 
+  
   for (const viewName in views) {
+    renderName = views[viewName]["renderer"];
     views[viewName]["components"] = parseComps(views[viewName]["components"], userContext, userComp)
-  }
-
-  // checks if all the components are of the right renderer
-  for (const viewName in views){
-    const view: View = views[viewName]
-    for (const componentName in view["components"]){
-      const component = view["components"][componentName]
-      if (component["renderer"] !== view["renderer"]){
-        // raise error
-        console.log("TODO: INVALID COMPONENTS FOR A RENDER")
-      }
-    }
   }
 
   return views;
@@ -55,6 +60,12 @@ export function parseComps(components: Component[], injectedContext: Context, us
 
     // Checks to see if the name of the component matches a primitive
     if (component["$"] in primitiveComponents) {
+
+      //TODO Make this raise some popup error
+      if (primitiveComponents[component["$"]]["renderer"] != renderName){
+        console.log("Bad")
+      }
+
       // creates a copy of the component
       const newComp: Component = { ...injectedContext, ...component}
 
@@ -64,7 +75,7 @@ export function parseComps(components: Component[], injectedContext: Context, us
           newComp[prop as keyof Component] = parseComputedProp(component[prop as keyof Component], injectedContext)
         }
       }
-      return [{...newComp, ...primitiveComponents[component["$"] as keyof Object]}]
+      return [newComp]
     }
 
     // Checks to see if the name of the component matches a user defined component
@@ -75,9 +86,8 @@ export function parseComps(components: Component[], injectedContext: Context, us
         { ...injectedContext, ...component }, userComponents)
     }
 
-    // Error Handling
     else {
-      // TODO
+      // TODO Error Handling
       console.log("Component by the name of " + component['$'] + " does not exist")
       return []
     }
