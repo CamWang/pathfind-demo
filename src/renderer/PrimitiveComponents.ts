@@ -1,10 +1,8 @@
 import { Graphics as GraphicsType } from "@pixi/graphics";
 import {  Component, Event } from "./types";
-import {D2InstrinsicComponents} from "./D2Renderer"
+import {D2InstrinsicComponents} from "./D2Renderer/D2Primitives"
 
 export type DrawingInstruction = (g:GraphicsType, event:Event) => void;
-
-
 
 export type InstrinsicComponents = {
   [key:string]: {"converter" : (comp:Component)=>DrawingInstruction,

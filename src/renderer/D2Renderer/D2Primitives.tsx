@@ -1,10 +1,7 @@
-import { Graphics, Stage } from "@inlet/react-pixi";
 import { Graphics as GraphicsType, } from "@pixi/graphics";
-import { useCallback } from "react";
-import { Component, Event, View } from "./types";
-import { DrawingInstruction, InstrinsicComponents } from "./PrimitiveComponents"
+import { Component, Event } from "../types";
+import { InstrinsicComponents } from "../PrimitiveComponents"
 import * as PIXI from 'pixi.js';
-
 
 // default context
 const context = {
@@ -25,15 +22,10 @@ const context = {
   alpha: 1,
 }
 
-
-type D2RendererProps = {
-  parsedComps: View,
-  eventList: Event[]
-}
-
 const scale = (length: number): number => {
   return length * context.scale;
 }
+
 
 export const D2InstrinsicComponents: InstrinsicComponents = {
   "rect": {
@@ -43,15 +35,33 @@ export const D2InstrinsicComponents: InstrinsicComponents = {
   "circle": {
     "converter": (comp: Component) => circleDrawingCoverter(comp),
     "renderer": "2D",
+  },
+  "polygon":{
+    "converter": (comp: Component) => polygonDrawingCoverter(comp),
+    "renderer": "2D",
+  },
+  "path":{
+    "converter": (comp: Component) => pathDrawingCoverter(comp),
+    "renderer": "2D",
   }
 }
 
+
+function polygonDrawingCoverter(component: Component) {
+
+  return (g: GraphicsType, event: Event) => {}
+}
+
+function pathDrawingCoverter(component: Component) {
+
+  return (g: GraphicsType, event: Event) => {}
+}
 
 function circleDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
     for (const prop in component) {
-      if (typeof component[prop] == "function" && prop != "converter") {
+      if (typeof component[prop] === "function" && prop !== "converter") {
         component[prop] = component[prop](event);
       }
     }
@@ -93,7 +103,7 @@ function rectDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
     for (const prop in component) {
-      if (typeof component[prop] == "function" && prop != "converter") {
+      if (typeof component[prop] === "function" && prop !== "converter") {
         component[prop] = component[prop](event);
       }
     }
@@ -130,28 +140,4 @@ function rectDrawingCoverter(component: Component) {
     rect.addChild(buttonText);
     g.addChild(rect)
   }
-}
-
-
-export function D2Renderer({ parsedComps, eventList }: D2RendererProps) {
-  /**
-   * TODO style the source and destination node
-   */
-
-  const drawInstructions = parsedComps["components"].map((ele: Component) => {
-    return D2InstrinsicComponents[ele["$"]]["converter"](ele);
-  })
-
-  const draw = useCallback((g: GraphicsType) => {
-    for (const event of eventList) {
-      console.log(event)
-      drawInstructions.forEach((instr: DrawingInstruction) => instr(g, event))
-    }
-  }, [eventList, drawInstructions]);
-
-  return (
-    <Stage options={{ backgroundAlpha: 0 }} >
-      <Graphics draw={draw} />
-    </Stage>
-  )
 }
