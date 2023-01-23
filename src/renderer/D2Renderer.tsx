@@ -49,7 +49,44 @@ export const D2InstrinsicComponents: InstrinsicComponents = {
 
 function circleDrawingCoverter(component: Component) {
 
-  return (g: GraphicsType, event: Event) => { }
+  return (g: GraphicsType, event: Event) => {
+    for (const prop in component) {
+      if (typeof component[prop] == "function" && prop != "converter") {
+        component[prop] = component[prop](event);
+      }
+    }
+    let color;
+
+    if (event.type in context.colour) {
+      color = context.colour[event.type as keyof typeof context.colour];
+    }
+    if (!color) {
+      console.dir(event.type);
+    }
+
+    const circle = new PIXI.Graphics()
+    circle
+      .beginFill(
+        event.fill ?? component.fill ?? color ?? 0xff5722,
+        event.alpha ?? component.alpha ?? context.alpha)
+      .drawCircle(
+        scale(event.x ?? component.x),
+        scale(event.y ?? component.y),
+        scale(event.radius ?? component.radius ?? 1)
+      )
+      .endFill();
+
+    const buttonText = new PIXI.Text(component.text,
+      {
+        fontFamily: 'Arial',
+        fontSize: 10,
+        fill: "black",
+      });
+    buttonText.y = scale(event.y ?? component.y)
+    buttonText.x = scale(event.x ?? component.x);
+    circle.addChild(buttonText);
+    g.addChild(circle)
+  }
 }
 
 function rectDrawingCoverter(component: Component) {

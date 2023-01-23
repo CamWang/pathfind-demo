@@ -1403,7 +1403,7 @@ export function converter(){
         counter += 1
     }
 
-    newEventList.push({"id":currentEvent["id"], "type":currentEvent["type"], ...newObject})
+    newEventList.push({"id":currentEvent["id"], "type":currentEvent["type"], "pId":currentEvent["pId"], "f":Number(currentEvent["f"]), "g":Number(currentEvent["g"]), ...newObject})
   }
   console.log(newEventList)
 
