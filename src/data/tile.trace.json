@@ -40,8 +40,8 @@
         ]
       },
       "views": {
-        "main": {"renderer": "2D", "components":[{ "$":"tileboard" }]},
-        "tile":  {"renderer": "2D", "components":[{ "$": "tree" }]}
+        "main": {"renderer": "2d-pixi", "components":[{ "$":"tileboard" }]},
+        "tile":  {"renderer": "2d-pixi", "components":[{ "$": "tree" }]}
       }
     },
     "eventList": 

@@ -15,7 +15,7 @@
       ]
     },
     "views": {
-      "main": { "renderer": "2D", "components" :[{"$": "tile"} ] }
+      "main": { "renderer": "2d-pixi", "components" :[{"$": "tile"} ] }
     }
   },
   "eventList": [

@@ -170,10 +170,13 @@ test('parseComputedProp TC13', () => {
     "{{ [{'x':parent['x'], 'y':parent['y']}, {'x':x, 'y':y}] }}", {})({ "x": 1, "y":2, "parent":{"x":3, "y":4} })).toBe([{"x":1, "y":2},{"x":3, "y":4}]);
 });
 
-// context['parent']['x']
-//
-// parent['x']
-// context["parent"][context["x"]]
+describe('parseComputedProp',()=>{
+
+  it("parses arrays", ()=>{
+    expect(parseComputedProp(
+      "{{ [{'x':parent['x'], 'y':parent['y']}, {'x':x, 'y':y}] }}", {})({ "x": 1, "y":2, "parent":{"x":3, "y":4} })).toBe([{"x":1, "y":2},{"x":3, "y":4}]);
+  })
+})
 
 /**
  * Tests for parseComp function
@@ -370,14 +373,14 @@ test("parseViews TC1 - Tile View", () => {
 //     , {}, userComponents)).toEqual([])
 // })
 
-// test('parseComp TC1', () => {
-//   expect(parseComps([
-//     {
-//       "$": "rect",
-//       "width": 1,
-//       "height": 1,
-//       "data": {"stuff":"{{x}}"}
-//     }
-//   ]
-//     , {}, userComponents)).toEqual([])
-// })
+test('parseComp TC1', () => {
+  expect(parseComps([
+    {
+      "$": "rect",
+      "width": 1,
+      "height": 1,
+      "data": [{"x":"{{x}}", "y":"{{y}}"}, {"x":"{{parent.x}}", "y":"{{parent.y}}"}]
+    }
+  ]
+    , {}, userComponents)).toEqual([])
+})

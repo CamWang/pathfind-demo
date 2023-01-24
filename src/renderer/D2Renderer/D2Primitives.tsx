@@ -29,19 +29,19 @@ const scale = (length: number): number => {
 export const D2InstrinsicComponents: InstrinsicComponents = {
   "rect": {
     "converter": (comp: Component) => rectDrawingCoverter(comp),
-    "renderer": "2D",
+    "renderer": "2d-pixi",
   },
   "circle": {
     "converter": (comp: Component) => circleDrawingCoverter(comp),
-    "renderer": "2D",
+    "renderer": "2d-pixi",
   },
   "polygon":{
     "converter": (comp: Component) => polygonDrawingCoverter(comp),
-    "renderer": "2D",
+    "renderer": "2d-pixi",
   },
   "path":{
     "converter": (comp: Component) => pathDrawingCoverter(comp),
-    "renderer": "2D",
+    "renderer": "2d-pixi",
   }
 }
 
@@ -102,7 +102,7 @@ function rectDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
     for (const prop in component) {
-      if (typeof component[prop] === "function" && prop !== "converter") {
+      if (typeof component[prop] === "function") {
         component[prop] = component[prop](event);
       }
     }
