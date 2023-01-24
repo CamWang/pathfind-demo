@@ -138,6 +138,7 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
   if (!isPotNumProp) {
     val = `\`${val}\``
   }
+  console.log(val)
 
   return (context: Context) =>
     // eslint-disable-next-line no-new-func

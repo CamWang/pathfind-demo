@@ -131,7 +131,7 @@ test('parseComputedProp TC5', () => {
 
 // Tests parsing of the "context" string
 test('parseComputedProp TC6', () => {
-  expect(parseComputedProp("{{context[`${x}${y}`]}}", {})({ "x": 1, "y": 2, "12":3 })).toBe(3);
+  expect(parseComputedProp("{{context[`${x}${y}`]}}", {})({ "x": 1, "y": 2, "12": 3 })).toBe(3);
 });
 
 // Tests parsing of a string and computed part (accessing from context)
@@ -164,6 +164,16 @@ test('parseComputedProp TC12', () => {
   expect(parseComputedProp("{{_aA01}}", {})({ "_aA01": 1 })).toBe(1);
 });
 
+// Tests parsing an array containing computed information
+test('parseComputedProp TC13', () => {
+  expect(parseComputedProp(
+    "{{ [{'x':parent['x'], 'y':parent['y']}, {'x':x, 'y':y}] }}", {})({ "x": 1, "y":2, "parent":{"x":3, "y":4} })).toBe([{"x":1, "y":2},{"x":3, "y":4}]);
+});
+
+// context['parent']['x']
+//
+// parent['x']
+// context["parent"][context["x"]]
 
 /**
  * Tests for parseComp function
@@ -236,9 +246,9 @@ test('parseComp TC2', () => {
   ]
     , {}, userComponents).map((ele) => { return { ...ele, "text": ele["text"]({}) } }))
     .toStrictEqual(
-      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x":1, "y":1 },
-       { "$": "rect", "height": 1, "text": "21", "width": 1, "x":2, "y":1 },
-       { "$": "rect", "height": 1, "text": "31", "width": 1, "x":3, "y":1 }])
+      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x": 1, "y": 1 },
+      { "$": "rect", "height": 1, "text": "21", "width": 1, "x": 2, "y": 1 },
+      { "$": "rect", "height": 1, "text": "31", "width": 1, "x": 3, "y": 1 }])
 })
 
 // Tests parsing a large group of components (3 tile rows, 9 tiles)
@@ -259,15 +269,15 @@ test('parseComp TC3', () => {
   ]
     , {}, userComponents).map((ele) => { return { ...ele, "text": ele["text"]({}) } }))
     .toStrictEqual(
-      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x":1, "y":1 },
-       { "$": "rect", "height": 1, "text": "21", "width": 1, "x":2, "y":1 },
-       { "$": "rect", "height": 1, "text": "31", "width": 1, "x":3, "y":1 },
-       { "$": "rect", "height": 1, "text": "12", "width": 1, "x":1, "y":2 },
-       { "$": "rect", "height": 1, "text": "22", "width": 1, "x":2, "y":2 },
-       { "$": "rect", "height": 1, "text": "32", "width": 1, "x":3, "y":2 },
-       { "$": "rect", "height": 1, "text": "13", "width": 1, "x":1, "y":3 },
-       { "$": "rect", "height": 1, "text": "23", "width": 1, "x":2, "y":3 },
-       { "$": "rect", "height": 1, "text": "33", "width": 1, "x":3, "y":3 }])
+      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x": 1, "y": 1 },
+      { "$": "rect", "height": 1, "text": "21", "width": 1, "x": 2, "y": 1 },
+      { "$": "rect", "height": 1, "text": "31", "width": 1, "x": 3, "y": 1 },
+      { "$": "rect", "height": 1, "text": "12", "width": 1, "x": 1, "y": 2 },
+      { "$": "rect", "height": 1, "text": "22", "width": 1, "x": 2, "y": 2 },
+      { "$": "rect", "height": 1, "text": "32", "width": 1, "x": 3, "y": 2 },
+      { "$": "rect", "height": 1, "text": "13", "width": 1, "x": 1, "y": 3 },
+      { "$": "rect", "height": 1, "text": "23", "width": 1, "x": 2, "y": 3 },
+      { "$": "rect", "height": 1, "text": "33", "width": 1, "x": 3, "y": 3 }])
 })
 
 // Tests parsing a component with an invalid name (will need to fix later)
@@ -313,7 +323,7 @@ test("parseViews TC1 - Tile View", () => {
           "x": 3
         }
       ],
-      "tileboard":[
+      "tileboard": [
         {
           "$": "tilerow",
           "y": 1
@@ -329,8 +339,8 @@ test("parseViews TC1 - Tile View", () => {
       ]
     },
     "views": {
-      "tiles": {"renderer": "2D", "components":[ { "$":"tileboard" }]},
-      "main": {"renderer": "2D", "components":[{ "$": "tree" }]}
+      "tiles": { "renderer": "2D", "components": [{ "$": "tileboard" }] },
+      "main": { "renderer": "2D", "components": [{ "$": "tree" }] }
     }
   });
   const arr = [];
@@ -339,9 +349,35 @@ test("parseViews TC1 - Tile View", () => {
     expect(comp["$"]).toBe("rect");
     expect(comp.height).toBe(1);
     expect(comp.width).toBe(1);
-    arr.push(comp.text({"11":1, "12":2, "13":3, "21":4, "22":5, "23":6, "31":7, "32":8, "33":null}));
+    arr.push(comp.text({ "11": 1, "12": 2, "13": 3, "21": 4, "22": 5, "23": 6, "31": 7, "32": 8, "33": null }));
   }
   expect(arr).toEqual(
-    expect.arrayContaining([1,2,3,4,5,6,7,8,null])
+    expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, null])
   );
 })
+
+
+
+// test('parseComp TC1', () => {
+//   expect(parseComps([
+//     {
+//       "$": "path",
+//       "width": 1,
+//       "height": 1,
+//       "points": "{{ [{'x':parent[x], 'y':parent[y]},{'x':x, 'y':y} ]}}"
+//     }
+//   ]
+//     , {}, userComponents)).toEqual([])
+// })
+
+// test('parseComp TC1', () => {
+//   expect(parseComps([
+//     {
+//       "$": "rect",
+//       "width": 1,
+//       "height": 1,
+//       "data": {"stuff":"{{x}}"}
+//     }
+//   ]
+//     , {}, userComponents)).toEqual([])
+// })

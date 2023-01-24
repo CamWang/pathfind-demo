@@ -26,7 +26,6 @@ const scale = (length: number): number => {
   return length * context.scale;
 }
 
-
 export const D2InstrinsicComponents: InstrinsicComponents = {
   "rect": {
     "converter": (comp: Component) => rectDrawingCoverter(comp),
