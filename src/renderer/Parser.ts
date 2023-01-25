@@ -1,26 +1,8 @@
 import { Render, Components, Component, Views, Context, View } from "./types"
-import {primitiveComponents} from "./PrimitiveComponents"
+import { primitiveComponents } from "./PrimitiveComponents"
+import { isArray } from "lodash";
 
-/**
- * @todo Error handling for missing required fields
- * Convert more of the old formats
- * Documentation on how to format your render section of the Search Trace
- */
-
-// 1. import all the supported components in each of the renderers
-/**
- * il = {
- *  d2renderer: [
- *    Object, Object, Object
- *  ],
- *  d3renderer: [
- *    Object, 
- *  ]
- * }
- */
-
-
-let renderName:string;
+let renderName: string;
 
 /**
  * Parses all reviews in a Render
@@ -32,7 +14,7 @@ export function parseViews(renderDef: Render): Views {
   const userComp = renderDef.components ? renderDef.components : {}
   const userContext = renderDef.context ? renderDef.context : {}
 
-  
+
   for (const viewName in views) {
     renderName = views[viewName]["renderer"];
     views[viewName]["components"] = parseComps(views[viewName]["components"], userContext, userComp)
@@ -48,7 +30,7 @@ export function parseViews(renderDef: Render): Views {
  * @returns a list of parsed Components
  * @todo fix the error handling for required fields
  */
-export function parseComps(components: Component[], injectedContext: Context, userComponents : Components): Component[] {
+export function parseComps(components: Component[], injectedContext: Context, userComponents: Components): Component[] {
 
   /**
    * Parses a single Component
@@ -62,17 +44,17 @@ export function parseComps(components: Component[], injectedContext: Context, us
     if (component["$"] in primitiveComponents) {
 
       //TODO Make this raise some popup error
-      if (renderName != undefined && primitiveComponents[component["$"]]["renderer"] != renderName){
+      if (renderName != undefined && primitiveComponents[component["$"]]["renderer"] != renderName) {
         console.log("Bad")
       }
 
       // creates a copy of the component
-      const newComp: Component = { ...injectedContext, ...component}
+      const newComp: Component = { ...injectedContext, ...component }
 
       // goes through all the properties of the component and parses them when necessary
       for (const prop in component) {
-        if (isComputedProp(component[prop as keyof Component])) {
-          newComp[prop as keyof Component] = parseComputedProp(component[prop as keyof Component], injectedContext)
+        if (prop !== "$"){
+          newComp[prop as keyof Component] = parseProperty(component[prop as keyof Component], injectedContext)
         }
       }
       return [newComp]
@@ -97,19 +79,55 @@ export function parseComps(components: Component[], injectedContext: Context, us
   return result;
 }
 
+function arrayOfFunctions(array:Function[], injectedContext:Context){
+
+  return (context: Context) => array.map((ele:Function)=> ele({ ...injectedContext, ...context }))
+}
+
+export function parseProperty(val:any, injectedContext:Context){
+  switch (typeof val){
+    
+    case ("string"):
+      if (isComputedProp(val)){
+        val = parseComputedProp(val)
+      }
+
+      break;
+
+    case ("object"):
+      if (isArray(val)){
+        const newArray = []
+        for (const ele of val){
+          console.log(ele)
+          newArray.push(parseProperty(ele, injectedContext))
+        }
+        val = newArray
+        return arrayOfFunctions(val, injectedContext )
+      }
+      else{
+        for (const prop in val){
+          val[prop] = parseProperty(prop, injectedContext)
+        }
+        break;
+      }
+  }
+  return (context: Context) =>
+  // eslint-disable-next-line no-new-func
+  Function("context", `return ${val}`)
+    ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
+
+}
 
 /**
- * Parses a computed property into JavaScript code.
+ * Parses a computed property into JavaScript code stored in a String.
  * @param val the computed property to be parsed.
- * @param injectedContext any addtional context provided
- * @returns a Function that takes more in more Context and returns a value
+ * @returns a string which can be executed as JavaScript
  */
-export function parseComputedProp(val: string, injectedContext: Context): Function {
+export function parseComputedProp(val: string):string {
 
   const bracketsReg = /{{(.*?)}}/g;
   const contextStr = "context";
   let isPotNumProp = potRawCompProp(val);
-
 
   const varReg = "[a-zA-Z_][a-zA-Z_0-9]*"
   const dotAccReg = `(\\.${varReg})`
@@ -121,31 +139,31 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
   const tempReg = /\${[a-zA-Z_][a-zA-Z_0-9]*}/g
   const actualReg = new RegExp(varReg + remainReg, "g")
 
-  function parseVariable(str:string){
+  function parseVariable(str: string) {
     const firstVarReg = /^(.*?)[a-zA-Z_][a-zA-Z_0-9]*/
 
     return str.replace(new RegExp(brackVarReg, "g"), replaceBrackVar)
-              .replace(new RegExp(dotAccReg, "g"), replaceDotAcc)
-              .replace(new RegExp(brackDollarReg, "g"), replaceBrackDollar)
-              .replace(firstVarReg, replaceFirstVar)
+      .replace(new RegExp(dotAccReg, "g"), replaceDotAcc)
+      .replace(new RegExp(brackDollarReg, "g"), replaceBrackDollar)
+      .replace(firstVarReg, replaceFirstVar)
   }
 
-  function replaceFirstVar(str:string, p1:string){
+  function replaceFirstVar(str: string, p1: string) {
     return str === contextStr ? contextStr : "context['" + str + "']"
   }
 
-  function replaceDotAcc(str:string, p1:string){
+  function replaceDotAcc(str: string, p1: string) {
     return "['" + str.slice(1) + "']"
   }
 
-  function replaceBrackVar(str:string, p1:string){
-    return "[context['" + str.slice(1,-1) + "']]"
+  function replaceBrackVar(str: string, p1: string) {
+    return "[context['" + str.slice(1, -1) + "']]"
   }
 
-  function replaceBrackDollar(str: string, p1:string){
+  function replaceBrackDollar(str: string, p1: string) {
 
-    function dollarReplace(str:string, p1:string){
-      return "${context['" + str.slice(2,-1) + "']}"
+    function dollarReplace(str: string, p1: string) {
+      return "${context['" + str.slice(2, -1) + "']}"
     }
     return str.replace(tempReg, dollarReplace)
   }
@@ -156,18 +174,15 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
       : "${" + p1.replace(actualReg, parseVariable) + "}"
   }
 
+
   val = val.replace(bracketsReg, parseBrackets);
-  console.log(val)
 
   // if it isnt a number (thus a string) then additional quotations are added
   if (!isPotNumProp) {
     val = `\`${val}\``
   }
 
-  return (context: Context) =>
-    // eslint-disable-next-line no-new-func
-    Function("context", `return ${val}`)
-      ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
+  return val
 }
 
 
@@ -177,7 +192,7 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
  * @returns True if the computed property includes "{{}}", False otherwise
  */
 export function isComputedProp(val: any): boolean {
-  if (val && typeof val !== "function"){
+  if (val && typeof val !== "function") {
     if (typeof val !== "string") {
       val = JSON.stringify(val);
     }

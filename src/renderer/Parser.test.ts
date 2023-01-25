@@ -1,4 +1,5 @@
-import { parseComps, isComputedProp, potRawCompProp, parseComputedProp, parseViews } from "./Parser";
+import { parseComps, isComputedProp, potRawCompProp, parseProperty, parseViews } from "./Parser";
+import { Component, Event } from "./types";
 /**
  * {{}} (double bracers) means everything inside will be executed as JavaScript in context with variables refering to the properties in the current component
  * 
@@ -98,115 +99,123 @@ test('potRawCompProp TC6', () => {
 });
 
 
-
-
 /**
- * Tests for parseComputedProp function
+ * Tests for parseProperty function
  */
 
 // Tests basic parsing of simpliest computed property which accesses value from the context
-test('parseComputedProp TC1', () => {
-  expect(parseComputedProp("{{x}}", {})({ "x": 1, "y": 2 })).toBe(1);
+test('parseProperty TC1', () => {
+  expect(parseProperty("{{x}}", {})({ "x": 1, "y": 2 })).toBe(1);
 });
 
 // Tests basic parsing of where it is not a raw computed property
-test('parseComputedProp TC2', () => {
-  expect(parseComputedProp("{{x}} + {{y}}", {})({ "x": 1, "y": 2 })).toBe("1 + 2");
+test('parseProperty TC2', () => {
+  expect(parseProperty("{{x}} + {{y}}", {})({ "x": 1, "y": 2 })).toBe("1 + 2");
 });
 
 // Tests basic parsing where it is a raw computed property but uses `${}
-test('parseComputedProp TC3', () => {
-  expect(parseComputedProp("{{`${x}`}}", {})({ "x": 1, "y": 2 })).toBe("1");
+test('parseProperty TC3', () => {
+  expect(parseProperty("{{`${x}`}}", {})({ "x": 1, "y": 2 })).toBe("1");
 });
 
 // Test Case 2 but as a raw computed property
-test('parseComputedProp TC4', () => {
-  expect(parseComputedProp("{{`${x} + ${y}`}}", {})({ "x": 1, "y": 2 })).toBe("1 + 2");
+test('parseProperty TC4', () => {
+  expect(parseProperty("{{`${x} + ${y}`}}", {})({ "x": 1, "y": 2 })).toBe("1 + 2");
 });
 
 // Tests parsing of slightly more complex raw computed properties
-test('parseComputedProp TC5', () => {
-  expect(parseComputedProp("{{x + y}}", {})({ "x": 1, "y": 2 })).toBe(3);
+test('parseProperty TC5', () => {
+  expect(parseProperty("{{x + y}}", {})({ "x": 1, "y": 2 })).toBe(3);
 });
 
 // Tests parsing of the "context" string
-test('parseComputedProp TC6', () => {
-  expect(parseComputedProp("{{context[`${x}${y}`]}}", {})({ "x": 1, "y": 2, "12": 3 })).toBe(3);
+test('parseProperty TC6', () => {
+  expect(parseProperty("{{context[`${x}${y}`]}}", {})({ "x": 1, "y": 2, "12": 3 })).toBe(3);
 });
 
 // Tests parsing of a string and computed part (accessing from context)
-test('parseComputedProp TC7', () => {
-  expect(parseComputedProp("Test {{x}}", {})({ "x": 1, "y": 2 })).toBe("Test 1");
+test('parseProperty TC7', () => {
+  expect(parseProperty("Test {{x}}", {})({ "x": 1, "y": 2 })).toBe("Test 1");
 });
 
 // Tests parsing of a string and computed part (accessing from injectedContext)
-test('parseComputedProp TC8', () => {
-  expect(parseComputedProp("Test {{x}}", { "x": 5 })({})).toBe("Test 5");
+test('parseProperty TC8', () => {
+  expect(parseProperty("Test {{x}}", { "x": 5 })({})).toBe("Test 5");
 });
 
 // Tests parsing of a string and computed part (with both context and injectContext should take from the context)
-test('parseComputedProp TC9', () => {
-  expect(parseComputedProp("Test {{x}}", { "x": 5 })({ "x": 1 })).toBe("Test 1");
+test('parseProperty TC9', () => {
+  expect(parseProperty("Test {{x}}", { "x": 5 })({ "x": 1 })).toBe("Test 1");
 });
 
 // Tests parsing of a simple number within the computed property
-test('parseComputedProp TC10', () => {
-  expect(parseComputedProp("{{100}}", {})({ "x": 1 })).toBe(100);
+test('parseProperty TC10', () => {
+  expect(parseProperty("{{100}}", {})({ "x": 1 })).toBe(100);
 });
 
 // Tests parsing of simple arithmetics with computed property
-test('parseComputedProp TC11', () => {
-  expect(parseComputedProp("{{x + 1}}", {})({ "x": 1 })).toBe(2);
+test('parseProperty TC11', () => {
+  expect(parseProperty("{{x + 1}}", {})({ "x": 1 })).toBe(2);
 });
 
 // Tests parsing of variable containing all the different valid characters of a variable name
-test('parseComputedProp TC12', () => {
-  expect(parseComputedProp("{{_aA01}}", {})({ "_aA01": 1 })).toBe(1);
+test('parseProperty TC12', () => {
+  expect(parseProperty("{{_aA01}}", {})({ "_aA01": 1 })).toBe(1);
 });
 
-describe('parseComputedProp Test Suite', ()=>{
+describe('parseProperty tests for parsing double indexing', () => {
 
   // context['parent']['x']
-  it("Parses a nested computed property using dot (.) accessing 1", ()=>{
-    expect(parseComputedProp(
-      "{{ parent.x }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
+  it("Parses a nested computed property using dot (.) accessing 1", () => {
+    expect(parseProperty(
+      "{{ parent.x }}", {})({ "parent": { "type": "test", "id": 1, "x": 3, "y": 4 } })).toBe(3);
   })
 
   // context['parent']['x']
-  it("Parses a nested computed property using bracket ([]) accessing 1", ()=>{
-    expect(parseComputedProp(
-      "{{ parent['x'] }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
+  it("Parses a nested computed property using bracket ([]) accessing 1", () => {
+    expect(parseProperty(
+      "{{ parent['x'] }}", {})({ "parent": { "type": "test", "id": 1, "x": 3, "y": 4 } })).toBe(3);
   })
 
   // context['parent'][context['x']]
-  it("Parses a nested computed property using bracket ([]) accessing with multiple brackets", ()=>{
-    expect(parseComputedProp(
-      "{{ parent[x] }}", {})({"x": "y", "parent":{"x":3, "y":4} })).toBe(4);
+  it("Parses a nested computed property using bracket ([]) accessing with multiple brackets", () => {
+    expect(parseProperty(
+      "{{ parent[x] }}", {})({ "x": "y", "parent": { "type": "test", "id": 1, "x": 3, "y": 4 } })).toBe(4);
   })
 
   // context['parent']['x']['y']
-  it("Parses a nested computed property using dot (.) accessing ", ()=>{
-    expect(parseComputedProp(
-      "{{ parent.x.y }}", {})({ "parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  it("Parses a nested computed property using dot (.) accessing ", () => {
+    expect(parseProperty(
+      "{{ parent.x.y }}", {})({ "parent": { "type": "test", "id": 1, "x": { "y": 1 }, "y": 4 } })).toBe(1);
   })
 
   // context['parent']['x']['y']
-  it("Parses a nested computed property using dot (.) accessing ", ()=>{
-    expect(parseComputedProp(
-      "{{ parent['x']['y'] }}", {})({ "parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  it("Parses a nested computed property using dot (.) accessing ", () => {
+    expect(parseProperty(
+      "{{ parent['x']['y'] }}", {})({ "parent": { "type": "test", "id": 1, "x": { "y": 1 }, "y": 4 } })).toBe(1);
   })
 
   // context['parent']['x']['y']
-  it("", ()=>{
-    expect(parseComputedProp(
-      "{{ parent['x'].y }}", {})({"parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  it("", () => {
+    expect(parseProperty(
+      "{{ parent['x'].y }}", {})({ "parent": { "type": "test", "id": 1, "x": { "y": 1 }, "y": 4 } })).toBe(1);
   })
 
   // context['parent'][context['x']]['y']
-  it("", ()=>{
-    expect(parseComputedProp(
-      "{{ parent[x]['y'] }}", {})({"x":"x", "parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  it("", () => {
+    expect(parseProperty(
+      "{{ parent[x]['y'] }}", {})({ "x": "x", "parent": { "type": "test", "id": 1, "x": { "y": 1 }, "y": 4 } })).toBe(1);
   })
+})
+
+describe('parseProperty tests for parsing arrays and objects', () => {
+
+  // context['parent']['x']
+  it("Parses a nested computed property using dot (.) accessing 1", () => {
+    expect(parseProperty(["{{x}}", "{{y}}"], {})({ "x":1, "y":2})).toStrictEqual([1,2]);
+  })
+
+
 })
 
 /**
@@ -218,7 +227,7 @@ const userComponents = {
       "$": "rect",
       "width": 1,
       "height": 1,
-      "text": "{{`${x}${y}`}}"
+      "text": "{{context[`${x}${y}`]}}"
     }
   ],
   "tilerow": [
@@ -251,6 +260,16 @@ const userComponents = {
   ]
 }
 
+function toValue(component: Component, event: Event) {
+  for (const prop in component) {
+    if (typeof component[prop] === "function" && prop !== "converter") {
+      component[prop] = component[prop](event);
+    }
+  }
+  return component
+}
+
+
 // Tests the parsing of a single Component which will parse directly to a primitive component.
 test('parseComp TC1', () => {
   expect(parseComps([
@@ -261,7 +280,9 @@ test('parseComp TC1', () => {
       "text": "{{context[`${x}${y}`]}}"
     }
   ]
-    , {}, userComponents).map((ele) => { return { ...ele, "text": ele["text"](({ "x": 1, "y": 2, '12': 3 })) } }))
+    , {}, userComponents).map((ele) => {
+      return toValue(ele, { "type": "test", "id": 1, "x": 1, "y": 2, '12': 3 })
+    }))
     .toStrictEqual([{
       "$": "rect",
       "width": 1,
@@ -269,6 +290,8 @@ test('parseComp TC1', () => {
       "text": 3
     }])
 })
+
+
 
 // Tests parsing a group of components (3 tiles) which will each be parsed into a primitive component
 test('parseComp TC2', () => {
@@ -278,11 +301,13 @@ test('parseComp TC2', () => {
       "y": 1
     }
   ]
-    , {}, userComponents).map((ele) => { return { ...ele, "text": ele["text"]({}) } }))
+    , {}, userComponents).map((ele) => {
+      return toValue(ele, { "type": "test", "id": 1, '11': 1, '21':2, "31":3 })
+    }))
     .toStrictEqual(
-      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x": 1, "y": 1 },
-      { "$": "rect", "height": 1, "text": "21", "width": 1, "x": 2, "y": 1 },
-      { "$": "rect", "height": 1, "text": "31", "width": 1, "x": 3, "y": 1 }])
+      [{ "$": "rect", "height": 1, "text": 1, "width": 1, "x": 1, "y": 1 },
+      { "$": "rect", "height": 1, "text": 2, "width": 1, "x": 2, "y": 1 },
+      { "$": "rect", "height": 1, "text": 3, "width": 1, "x": 3, "y": 1 }])
 })
 
 // Tests parsing a large group of components (3 tile rows, 9 tiles)
@@ -301,17 +326,19 @@ test('parseComp TC3', () => {
       "y": 3
     }
   ]
-    , {}, userComponents).map((ele) => { return { ...ele, "text": ele["text"]({}) } }))
+    , {}, userComponents).map((ele) => {
+      return toValue(ele, { "type": "test", "id": 1, '11': 1, '21':2, "31":3, '12': 4, '22':5, "32":6, '13': 7, '23':8, "33":9 })
+    }))
     .toStrictEqual(
-      [{ "$": "rect", "height": 1, "text": "11", "width": 1, "x": 1, "y": 1 },
-      { "$": "rect", "height": 1, "text": "21", "width": 1, "x": 2, "y": 1 },
-      { "$": "rect", "height": 1, "text": "31", "width": 1, "x": 3, "y": 1 },
-      { "$": "rect", "height": 1, "text": "12", "width": 1, "x": 1, "y": 2 },
-      { "$": "rect", "height": 1, "text": "22", "width": 1, "x": 2, "y": 2 },
-      { "$": "rect", "height": 1, "text": "32", "width": 1, "x": 3, "y": 2 },
-      { "$": "rect", "height": 1, "text": "13", "width": 1, "x": 1, "y": 3 },
-      { "$": "rect", "height": 1, "text": "23", "width": 1, "x": 2, "y": 3 },
-      { "$": "rect", "height": 1, "text": "33", "width": 1, "x": 3, "y": 3 }])
+      [{ "$": "rect", "height": 1, "text": 1, "width": 1, "x": 1, "y": 1 },
+      { "$": "rect", "height": 1, "text": 2, "width": 1, "x": 2, "y": 1 },
+      { "$": "rect", "height": 1, "text": 3, "width": 1, "x": 3, "y": 1 },
+      { "$": "rect", "height": 1, "text": 4, "width": 1, "x": 1, "y": 2 },
+      { "$": "rect", "height": 1, "text": 5, "width": 1, "x": 2, "y": 2 },
+      { "$": "rect", "height": 1, "text": 6, "width": 1, "x": 3, "y": 2 },
+      { "$": "rect", "height": 1, "text": 7, "width": 1, "x": 1, "y": 3 },
+      { "$": "rect", "height": 1, "text": 8, "width": 1, "x": 2, "y": 3 },
+      { "$": "rect", "height": 1, "text": 9, "width": 1, "x": 3, "y": 3 }])
 })
 
 // Tests parsing a component with an invalid name (will need to fix later)
@@ -376,16 +403,17 @@ test("parseViews TC1 - Tile View", () => {
       "tiles": { "renderer": "2d-pixi", "components": [{ "$": "tileboard" }] },
       "main": { "renderer": "2d-pixi", "components": [{ "$": "tree" }] }
     }
-  });
+  }).tiles.components.map((ele) => {
+    return toValue(ele, { "type": "test", "id": 1, '11': 1, '21':2, "31":3, '12': 4, '22':5, "32":6, '13': 7, '23':8, "33":9 })
+  })
   const arr = [];
+  let counter = 1
   console.log(views)
-  for (const comp of views.tiles.components) {
+  for (const comp of views) {
     expect(comp["$"]).toBe("rect");
     expect(comp.height).toBe(1);
     expect(comp.width).toBe(1);
-    arr.push(comp.text({ "11": 1, "12": 2, "13": 3, "21": 4, "22": 5, "23": 6, "31": 7, "32": 8, "33": null }));
+    expect(comp.text ).toBe(counter)
+    counter += 1
   }
-  expect(arr).toEqual(
-    expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, null])
-  );
 })
