@@ -118,6 +118,7 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
   const brackDollarReg = `(\\[\`(\\\${${varReg}})+\`\\])`
   const remainReg = "(" + dotAccReg + "|" + brackStrReg + "|" + brackVarReg + "|" + brackDollarReg + ")*"
 
+  const tempReg = /\${[a-zA-Z_][a-zA-Z_0-9]*}/g
   const actualReg = new RegExp(varReg + remainReg, "g")
 
   function parseVariable(str:string){
@@ -142,7 +143,11 @@ export function parseComputedProp(val: string, injectedContext: Context): Functi
   }
 
   function replaceBrackDollar(str: string, p1:string){
-    return "[context" + str + "]"
+
+    function dollarReplace(str:string, p1:string){
+      return "${context['" + str.slice(2,-1) + "']}"
+    }
+    return str.replace(tempReg, dollarReplace)
   }
 
 
