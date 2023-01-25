@@ -164,17 +164,48 @@ test('parseComputedProp TC12', () => {
   expect(parseComputedProp("{{_aA01}}", {})({ "_aA01": 1 })).toBe(1);
 });
 
-// Tests parsing an array containing computed information
-test('parseComputedProp TC13', () => {
-  expect(parseComputedProp(
-    "{{ [{'x':parent['x'], 'y':parent['y']}, {'x':x, 'y':y}] }}", {})({ "x": 1, "y":2, "parent":{"x":3, "y":4} })).toBe([{"x":1, "y":2},{"x":3, "y":4}]);
-});
+describe('parseComputedProp Test Suite', ()=>{
 
-describe('parseComputedProp',()=>{
-
-  it("parses arrays", ()=>{
+  // context['parent']['x']
+  it("Parses a nested computed property using dot (.) accessing ", ()=>{
     expect(parseComputedProp(
-      "{{ [{'x':parent['x'], 'y':parent['y']}, {'x':x, 'y':y}] }}", {})({ "x": 1, "y":2, "parent":{"x":3, "y":4} })).toBe([{"x":1, "y":2},{"x":3, "y":4}]);
+      "{{ parent.x }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
+  })
+
+  // context['parent']['x']
+  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent['x'] }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
+  })
+
+  // context['parent'][context['x']]
+  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent[x] }}", {})({"x": "y", "parent":{"x":3, "y":4} })).toBe(4);
+  })
+
+  // context['parent']['x']['y']
+  it("Parses a nested computed property using dot (.) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent.x.y }}", {})({ "parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  })
+
+  // context['parent']['x']['y']
+  it("Parses a nested computed property using dot (.) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent['x']['y'] }}", {})({ "parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  })
+
+  // context['parent']['x']['y']
+  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent['x'].y }}", {})({"parent":{"x":{"y":1}, "y":4} })).toBe(1);
+  })
+
+  // context['parent'][context['x']]['y']
+  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+    expect(parseComputedProp(
+      "{{ parent[x]['y'] }}", {})({"x":"x", "parent":{"x":{"y":1}, "y":4} })).toBe(1);
   })
 })
 
