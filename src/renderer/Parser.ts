@@ -62,7 +62,7 @@ export function parseComps(components: Component[], injectedContext: Context, us
     if (component["$"] in primitiveComponents) {
 
       //TODO Make this raise some popup error
-      if (primitiveComponents[component["$"]]["renderer"] != renderName){
+      if (renderName != undefined && primitiveComponents[component["$"]]["renderer"] != renderName){
         console.log("Bad")
       }
 
@@ -106,39 +106,58 @@ export function parseComps(components: Component[], injectedContext: Context, us
  */
 export function parseComputedProp(val: string, injectedContext: Context): Function {
 
-  const variableReg = /[a-zA-Z_][a-zA-Z_0-9]*/g;
   const bracketsReg = /{{(.*?)}}/g;
   const contextStr = "context";
   let isPotNumProp = potRawCompProp(val);
 
-  /**
-   * Parses bracketed sections
-   * @param str string that was matched
-   * @param p1 the contents of the bracketed section
-   * @returns the parsed contents
-   */
+
+  const varReg = "[a-zA-Z_][a-zA-Z_0-9]*"
+  const dotAccReg = `(\\.${varReg})`
+  const brackStrReg = `(\\['${varReg}'\\])`
+  const brackVarReg = `(\\[${varReg}\\])`
+  const brackDollarReg = `(\\[\`(\\\${${varReg}})+\`\\])`
+  const remainReg = "(" + dotAccReg + "|" + brackStrReg + "|" + brackVarReg + "|" + brackDollarReg + ")*"
+
+  const actualReg = new RegExp(varReg + remainReg, "g")
+
+  function parseVariable(str:string){
+    const firstVarReg = /^(.*?)[a-zA-Z_][a-zA-Z_0-9]*/
+
+    return str.replace(new RegExp(brackVarReg, "g"), replaceBrackVar)
+              .replace(new RegExp(dotAccReg, "g"), replaceDotAcc)
+              .replace(new RegExp(brackDollarReg, "g"), replaceBrackDollar)
+              .replace(firstVarReg, replaceFirstVar)
+  }
+
+  function replaceFirstVar(str:string, p1:string){
+    return str === contextStr ? contextStr : "context['" + str + "']"
+  }
+
+  function replaceDotAcc(str:string, p1:string){
+    return "['" + str.slice(1) + "']"
+  }
+
+  function replaceBrackVar(str:string, p1:string){
+    return "[context['" + str.slice(1,-1) + "']]"
+  }
+
+  function replaceBrackDollar(str: string, p1:string){
+    return "[context" + str + "]"
+  }
+
+
   function parseBrackets(str: string, p1: string) {
-    return isPotNumProp ? p1.replace(variableReg, parseVariable)
-      : "${" + p1.replace(variableReg, parseVariable) + "}"
+    return isPotNumProp ? p1.replace(actualReg, parseVariable)
+      : "${" + p1.replace(actualReg, parseVariable) + "}"
   }
 
-  /**
-   * Parses the isolated variables ('x') into context['x']
-   * @param str string that was matched
-   * @returns the parsed string
-   */
-  function parseVariable(str: string) {
-    return str === contextStr ? str : `context["${str}"]`
-  }
-
-  // first replaces the brackets
   val = val.replace(bracketsReg, parseBrackets);
+  console.log(val)
 
   // if it isnt a number (thus a string) then additional quotations are added
   if (!isPotNumProp) {
     val = `\`${val}\``
   }
-  console.log(val)
 
   return (context: Context) =>
     // eslint-disable-next-line no-new-func

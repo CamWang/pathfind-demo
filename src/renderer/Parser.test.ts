@@ -167,19 +167,19 @@ test('parseComputedProp TC12', () => {
 describe('parseComputedProp Test Suite', ()=>{
 
   // context['parent']['x']
-  it("Parses a nested computed property using dot (.) accessing ", ()=>{
+  it("Parses a nested computed property using dot (.) accessing 1", ()=>{
     expect(parseComputedProp(
       "{{ parent.x }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
   })
 
   // context['parent']['x']
-  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+  it("Parses a nested computed property using bracket ([]) accessing 1", ()=>{
     expect(parseComputedProp(
       "{{ parent['x'] }}", {})({ "parent":{"x":3, "y":4} })).toBe(3);
   })
 
   // context['parent'][context['x']]
-  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+  it("Parses a nested computed property using bracket ([]) accessing with multiple brackets", ()=>{
     expect(parseComputedProp(
       "{{ parent[x] }}", {})({"x": "y", "parent":{"x":3, "y":4} })).toBe(4);
   })
@@ -197,13 +197,13 @@ describe('parseComputedProp Test Suite', ()=>{
   })
 
   // context['parent']['x']['y']
-  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+  it("", ()=>{
     expect(parseComputedProp(
       "{{ parent['x'].y }}", {})({"parent":{"x":{"y":1}, "y":4} })).toBe(1);
   })
 
   // context['parent'][context['x']]['y']
-  it("Parses a nested computed property using bracket ([]) accessing ", ()=>{
+  it("", ()=>{
     expect(parseComputedProp(
       "{{ parent[x]['y'] }}", {})({"x":"x", "parent":{"x":{"y":1}, "y":4} })).toBe(1);
   })
@@ -373,8 +373,8 @@ test("parseViews TC1 - Tile View", () => {
       ]
     },
     "views": {
-      "tiles": { "renderer": "2D", "components": [{ "$": "tileboard" }] },
-      "main": { "renderer": "2D", "components": [{ "$": "tree" }] }
+      "tiles": { "renderer": "2d-pixi", "components": [{ "$": "tileboard" }] },
+      "main": { "renderer": "2d-pixi", "components": [{ "$": "tree" }] }
     }
   });
   const arr = [];
@@ -388,30 +388,4 @@ test("parseViews TC1 - Tile View", () => {
   expect(arr).toEqual(
     expect.arrayContaining([1, 2, 3, 4, 5, 6, 7, 8, null])
   );
-})
-
-
-
-// test('parseComp TC1', () => {
-//   expect(parseComps([
-//     {
-//       "$": "path",
-//       "width": 1,
-//       "height": 1,
-//       "points": "{{ [{'x':parent[x], 'y':parent[y]},{'x':x, 'y':y} ]}}"
-//     }
-//   ]
-//     , {}, userComponents)).toEqual([])
-// })
-
-test('parseComp TC1', () => {
-  expect(parseComps([
-    {
-      "$": "rect",
-      "width": 1,
-      "height": 1,
-      "data": [{"x":"{{x}}", "y":"{{y}}"}, {"x":"{{parent.x}}", "y":"{{parent.y}}"}]
-    }
-  ]
-    , {}, userComponents)).toEqual([])
 })
