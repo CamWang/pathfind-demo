@@ -210,11 +210,25 @@ describe('parseProperty tests for parsing double indexing', () => {
 
 describe('parseProperty tests for parsing arrays and objects', () => {
 
-  // context['parent']['x']
-  it("Parses a nested computed property using dot (.) accessing 1", () => {
+  // [context[x], context[y]]
+  it("Parses a list of computed values", () => {
     expect(parseProperty(["{{x}}", "{{y}}"], {})({ "x":1, "y":2})).toStrictEqual([1,2]);
   })
 
+  // {"test":context[x], "test2":context[y]}
+  it("Parses a object of computed values", () => {
+    expect(parseProperty({"test":"{{x}}", "test2":"{{y}}"}, {})({ "x":1, "y":2})).toStrictEqual({"test":1, "test2":2});
+  })
+
+  // {"test":[context[x], context[y], 3], "test2":context[y]}
+  it("Parses a object of computed values and arrays of computed values", () => {
+    expect(parseProperty({"test":['{{x}}', '{{y}}', 3], "test2":"{{y}}"}, {})({ "x":1, "y":2})).toStrictEqual({"test":[1, 2, 3], "test2":2});
+  })
+
+  // [{"test1":context[x], "test2":context[y]}, {"test3":1, "test4": context[x]+context[y]}]
+  it("Parses an array of computed values and objects", () => {
+    expect(parseProperty([{"test1":"{{x}}", "test2":"{{y}}"}, {"test3":1, "test4": "{{x+y}}"}], {})({ "x":1, "y":2})).toStrictEqual([{"test1":1, "test2":2}, {"test3":1, "test4":3}]);
+  })
 
 })
 
@@ -352,6 +366,28 @@ test('parseComp TC4', () => {
     }
   ]
     , {}, userComponents)).toStrictEqual([])
+})
+
+
+test('parseComp TC5', () => {
+  expect(parseComps([
+    {
+      "$": "rect",
+      "width": 1,
+      "height": 1,
+      "x": "{{x}}",
+      "y": "{{y}}"
+    }
+  ],
+   {}, {}).map((ele) => {
+    return toValue(ele, { "type": "test", "id": 1, "x":1, "y":2 })
+  })).toStrictEqual([{
+    "$": "rect",
+    "width": 1,
+    "height": 1,
+    "x": 1,
+    "y": 2
+  }])
 })
 
 /**

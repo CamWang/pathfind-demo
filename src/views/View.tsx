@@ -6,7 +6,7 @@ import {parseViews} from "../renderer/Parser";
 export function View() {
   return (
     <>
-      <D2Renderer parsedComps={parseViews(trace2.render).main} eventList={trace2.eventList} />
+      <D2Renderer parsedComps={parseViews(trace.render).main} eventList={trace.eventList} />
     </>
   )
 }

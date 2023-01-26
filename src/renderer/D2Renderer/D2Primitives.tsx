@@ -60,7 +60,7 @@ function circleDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
     for (const prop in component) {
-      if (typeof component[prop] === "function" && prop !== "converter") {
+      if (typeof component[prop] === "function") {
         component[prop] = component[prop](event);
       }
     }
@@ -101,11 +101,16 @@ function circleDrawingCoverter(component: Component) {
 function rectDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
+
     for (const prop in component) {
       if (typeof component[prop] === "function") {
+        console.log(prop)
+        console.log(component[prop])
+        console.log(component[prop](event))
         component[prop] = component[prop](event);
       }
     }
+
     let color;
 
     if (event.type in context.colour) {

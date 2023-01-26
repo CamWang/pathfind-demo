@@ -4,6 +4,10 @@ import { isArray } from "lodash";
 
 let renderName: string;
 
+type objectOfFunctions = {
+  [key: string]: Function
+}
+
 /**
  * Parses all reviews in a Render
  * @param renderDef the render which contains the views to be parsed
@@ -79,43 +83,76 @@ export function parseComps(components: Component[], injectedContext: Context, us
   return result;
 }
 
+/**
+ * Takes in an array of Functions and makes it so that all of them are connected by the same parent function
+ * @param array the array of Functions
+ * @param injectedContext additional context provided to the functions
+ * @returns a single Function which contains all the other Functions
+ */
 function arrayOfFunctions(array:Function[], injectedContext:Context){
 
   return (context: Context) => array.map((ele:Function)=> ele({ ...injectedContext, ...context }))
 }
 
-export function parseProperty(val:any, injectedContext:Context){
+/**
+ * Takes in an object of Functions and makes it so that all of them are connected by the same parent function
+ * @param object the object of Functions
+ * @param injectedContext dditional context provided to the functions
+ * @returns a single Function which contains all the other Functions
+ */
+function objectOfFunctions(object:objectOfFunctions, injectedContext:Context){
+
+  return (context: Context) => {
+    for (const prop in object){
+      object[prop] = object[prop](context)
+    }
+    return object
+  }
+}
+
+/**
+ * Parses a single property (recursively calling down if required)
+ * @param val the value of the property to parse
+ * @param injectedContext additional context for the property
+ * @returns a Function which takes in context and returns the properties value
+ */
+export function parseProperty(val:any, injectedContext:Context): Function {
   switch (typeof val){
     
     case ("string"):
+      // when a string, we check to see if it is a computed property and then parse it when true (do nothing when not)
       if (isComputedProp(val)){
         val = parseComputedProp(val)
       }
-
       break;
 
     case ("object"):
+      // when an object we sort them into arrays and other objects
       if (isArray(val)){
+        // for an array we parse each of the elements in the array
         const newArray = []
         for (const ele of val){
-          console.log(ele)
           newArray.push(parseProperty(ele, injectedContext))
         }
         val = newArray
-        return arrayOfFunctions(val, injectedContext )
+        // then call a function which groups all the individual functions under one function call
+        return arrayOfFunctions(val, injectedContext)
       }
       else{
+        // for objects we parse each of the properties
         for (const prop in val){
-          val[prop] = parseProperty(prop, injectedContext)
+          val[prop] = parseProperty(val[prop], injectedContext)
         }
-        break;
+        // then call a function which groups all the individual functions under one function call
+        return objectOfFunctions(val, injectedContext)
       }
   }
+  
+  console.log(val)
   return (context: Context) =>
   // eslint-disable-next-line no-new-func
   Function("context", `return ${val}`)
     ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
-
 }
 
 /**
@@ -125,9 +162,9 @@ export function parseProperty(val:any, injectedContext:Context){
  */
 export function parseComputedProp(val: string):string {
 
+  // regex code
   const bracketsReg = /{{(.*?)}}/g;
   const contextStr = "context";
-  let isPotNumProp = potRawCompProp(val);
 
   const varReg = "[a-zA-Z_][a-zA-Z_0-9]*"
   const dotAccReg = `(\\.${varReg})`
@@ -139,36 +176,69 @@ export function parseComputedProp(val: string):string {
   const tempReg = /\${[a-zA-Z_][a-zA-Z_0-9]*}/g
   const actualReg = new RegExp(varReg + remainReg, "g")
 
+  let isPotNumProp = potRawCompProp(val);
+
+  /**
+   * Parses an individual variable section
+   * @param str the string that was matched
+   * @returns the parsed variable section
+   */
   function parseVariable(str: string) {
     const firstVarReg = /^(.*?)[a-zA-Z_][a-zA-Z_0-9]*/
 
+    // this section of code will replace all the bracketed variable sections first (for example [x] with [context[x]]), then will replace all the dot accessors (for example .x with [x]), then will replace all the dollar symbols (for example ${x} with ${context[x]}) and then replace the first variable (for example parent with context[parent])
     return str.replace(new RegExp(brackVarReg, "g"), replaceBrackVar)
       .replace(new RegExp(dotAccReg, "g"), replaceDotAcc)
-      .replace(new RegExp(brackDollarReg, "g"), replaceBrackDollar)
+      .replace(new RegExp(brackDollarReg, "g"), replacDollarVar)
       .replace(firstVarReg, replaceFirstVar)
   }
 
-  function replaceFirstVar(str: string, p1: string) {
+  /**
+   * Replaces the first variable if the str is not "context"
+   * @param str the string to replace
+   * @returns the replacement string
+   */
+  function replaceFirstVar(str: string) {
     return str === contextStr ? contextStr : "context['" + str + "']"
   }
 
-  function replaceDotAcc(str: string, p1: string) {
+  /**
+   * Replaces the dot accessors
+   * @param str the string to replace
+   * @returns the replacement string
+   */
+  function replaceDotAcc(str: string) {
     return "['" + str.slice(1) + "']"
   }
 
-  function replaceBrackVar(str: string, p1: string) {
+  /**
+   * Replaces bracketed variables
+   * @param str the string to replace
+   * @returns the replacement string
+   */
+  function replaceBrackVar(str: string) {
     return "[context['" + str.slice(1, -1) + "']]"
   }
 
-  function replaceBrackDollar(str: string, p1: string) {
+  /**
+   * Replaces dollar variables
+   * @param str the string to replace
+   * @returns the replacement string
+   */
+  function replacDollarVar(str: string) {
 
-    function dollarReplace(str: string, p1: string) {
+    function dollarReplace(str: string) {
       return "${context['" + str.slice(2, -1) + "']}"
     }
     return str.replace(tempReg, dollarReplace)
   }
 
-
+  /**
+   * Parses double bracketed sections ({{...}})
+   * @param str 
+   * @param p1 
+   * @returns 
+   */
   function parseBrackets(str: string, p1: string) {
     return isPotNumProp ? p1.replace(actualReg, parseVariable)
       : "${" + p1.replace(actualReg, parseVariable) + "}"
