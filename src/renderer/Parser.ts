@@ -1,10 +1,10 @@
-import { Render, Components, Component, Views, Context, View } from "./types"
+import { Render, Components, Component, Views, Context } from "./types"
 import { primitiveComponents } from "./PrimitiveComponents"
 import { isArray } from "lodash";
 
 let renderName: string;
 
-type objectOfFunctions = {
+type objectOfFunctionsType = {
   [key: string]: Function
 }
 
@@ -48,7 +48,7 @@ export function parseComps(components: Component[], injectedContext: Context, us
     if (component["$"] in primitiveComponents) {
 
       //TODO Make this raise some popup error
-      if (renderName != undefined && primitiveComponents[component["$"]]["renderer"] != renderName) {
+      if (renderName !== undefined && primitiveComponents[component["$"]]["renderer"] !== renderName) {
         console.log("Bad")
       }
 
@@ -57,7 +57,7 @@ export function parseComps(components: Component[], injectedContext: Context, us
 
       // goes through all the properties of the component and parses them when necessary
       for (const prop in component) {
-        if (prop !== "$"){
+        if (prop !== "$") {
           newComp[prop as keyof Component] = parseProperty(component[prop as keyof Component], injectedContext)
         }
       }
@@ -89,9 +89,9 @@ export function parseComps(components: Component[], injectedContext: Context, us
  * @param injectedContext additional context provided to the functions
  * @returns a single Function which contains all the other Functions
  */
-function arrayOfFunctions(array:Function[], injectedContext:Context){
+function arrayOfFunctions(array: Function[], injectedContext: Context) {
 
-  return (context: Context) => array.map((ele:Function)=> ele({ ...injectedContext, ...context }))
+  return (context: Context) => array.map((ele: Function) => ele({ ...injectedContext, ...context }))
 }
 
 /**
@@ -100,10 +100,10 @@ function arrayOfFunctions(array:Function[], injectedContext:Context){
  * @param injectedContext dditional context provided to the functions
  * @returns a single Function which contains all the other Functions
  */
-function objectOfFunctions(object:objectOfFunctions, injectedContext:Context){
+function objectOfFunctions(object: objectOfFunctionsType, injectedContext: Context) {
 
   return (context: Context) => {
-    for (const prop in object){
+    for (const prop in object) {
       object[prop] = object[prop](context)
     }
     return object
@@ -116,43 +116,42 @@ function objectOfFunctions(object:objectOfFunctions, injectedContext:Context){
  * @param injectedContext additional context for the property
  * @returns a Function which takes in context and returns the properties value
  */
-export function parseProperty(val:any, injectedContext:Context): Function {
-  switch (typeof val){
-    
+export function parseProperty(val: any, injectedContext: Context): Function {
+  switch (typeof val) {
+
     case ("string"):
       // when a string, we check to see if it is a computed property and then parse it when true (do nothing when not)
-      if (isComputedProp(val)){
+      if (isComputedProp(val)) {
         val = parseComputedProp(val)
       }
       break;
 
     case ("object"):
       // when an object we sort them into arrays and other objects
-      if (isArray(val)){
+      if (isArray(val)) {
         // for an array we parse each of the elements in the array
         const newArray = []
-        for (const ele of val){
+        for (const ele of val) {
           newArray.push(parseProperty(ele, injectedContext))
         }
-        val = newArray
         // then call a function which groups all the individual functions under one function call
-        return arrayOfFunctions(val, injectedContext)
+        return arrayOfFunctions(newArray, injectedContext)
       }
-      else{
+      else {
         // for objects we parse each of the properties
-        for (const prop in val){
+        for (const prop in val) {
           val[prop] = parseProperty(val[prop], injectedContext)
         }
         // then call a function which groups all the individual functions under one function call
         return objectOfFunctions(val, injectedContext)
       }
   }
-  
   console.log(val)
+
   return (context: Context) =>
-  // eslint-disable-next-line no-new-func
-  Function("context", `return ${val}`)
-    ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
+    // eslint-disable-next-line no-new-func
+    Function("context", `return ${val}`)
+      ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
 }
 
 /**
@@ -160,7 +159,7 @@ export function parseProperty(val:any, injectedContext:Context): Function {
  * @param val the computed property to be parsed.
  * @returns a string which can be executed as JavaScript
  */
-export function parseComputedProp(val: string):string {
+export function parseComputedProp(val: string): string {
 
   // regex code
   const bracketsReg = /{{(.*?)}}/g;
@@ -173,7 +172,7 @@ export function parseComputedProp(val: string):string {
   const brackDollarReg = `(\\[\`(\\\${${varReg}})+\`\\])`
   const remainReg = "(" + dotAccReg + "|" + brackStrReg + "|" + brackVarReg + "|" + brackDollarReg + ")*"
 
-  const tempReg = /\${[a-zA-Z_][a-zA-Z_0-9]*}/g
+  const dollarReg = /\${[a-zA-Z_][a-zA-Z_0-9]*}/g
   const actualReg = new RegExp(varReg + remainReg, "g")
 
   let isPotNumProp = potRawCompProp(val);
@@ -230,7 +229,7 @@ export function parseComputedProp(val: string):string {
     function dollarReplace(str: string) {
       return "${context['" + str.slice(2, -1) + "']}"
     }
-    return str.replace(tempReg, dollarReplace)
+    return str.replace(dollarReg, dollarReplace)
   }
 
   /**

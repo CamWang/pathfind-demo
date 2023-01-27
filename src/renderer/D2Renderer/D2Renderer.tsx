@@ -15,6 +15,7 @@ export function D2Renderer({ parsedComps, eventList }: D2RendererProps) {
    * TODO style the source and destination node
    */
   console.log(parsedComps)
+  console.log()
   const drawInstructions = parsedComps["components"].map((ele: Component) => {
     return D2InstrinsicComponents[ele["$"]]["converter"](ele);
   })

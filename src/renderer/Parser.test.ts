@@ -15,6 +15,15 @@ import { Component, Event } from "./types";
 
  */
 
+  function toValue(component: Component, event: Event) {
+  for (const prop in component) {
+    if (typeof component[prop] === "function") {
+      component[prop] = component[prop](event);
+    }
+  }
+  return component
+}
+
 
 /**
  * Tests for isCompProp function
@@ -211,7 +220,7 @@ describe('parseProperty tests for parsing double indexing', () => {
 describe('parseProperty tests for parsing arrays and objects', () => {
 
   // [context[x], context[y]]
-  it("Parses a list of computed values", () => {
+  it("Parses a array of computed values", () => {
     expect(parseProperty(["{{x}}", "{{y}}"], {})({ "x":1, "y":2})).toStrictEqual([1,2]);
   })
 
@@ -274,14 +283,6 @@ const userComponents = {
   ]
 }
 
-function toValue(component: Component, event: Event) {
-  for (const prop in component) {
-    if (typeof component[prop] === "function" && prop !== "converter") {
-      component[prop] = component[prop](event);
-    }
-  }
-  return component
-}
 
 
 // Tests the parsing of a single Component which will parse directly to a primitive component.

@@ -107,6 +107,7 @@ function rectDrawingCoverter(component: Component) {
         console.log(prop)
         console.log(component[prop])
         console.log(component[prop](event))
+        console.log(typeof component[prop])
         component[prop] = component[prop](event);
       }
     }
