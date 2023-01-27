@@ -14,8 +14,6 @@ export function D2Renderer({ parsedComps, eventList }: D2RendererProps) {
   /**
    * TODO style the source and destination node
    */
-  console.log(parsedComps)
-  console.log()
   const drawInstructions = parsedComps["components"].map((ele: Component) => {
     return D2InstrinsicComponents[ele["$"]]["converter"](ele);
   })
@@ -23,7 +21,6 @@ export function D2Renderer({ parsedComps, eventList }: D2RendererProps) {
 
   const draw = useCallback((g: GraphicsType) => {
     for (const event of eventList) {
-      console.log(event)
       drawInstructions.forEach((instr: DrawingInstruction) => instr(g, event))
     }
   }, [eventList, drawInstructions]);

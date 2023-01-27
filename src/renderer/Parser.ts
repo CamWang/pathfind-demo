@@ -118,7 +118,6 @@ function objectOfFunctions(object: objectOfFunctionsType, injectedContext: Conte
  */
 export function parseProperty(val: any, injectedContext: Context): Function {
   switch (typeof val) {
-
     case ("string"):
       // when a string, we check to see if it is a computed property and then parse it when true (do nothing when not)
       if (isComputedProp(val)) {
@@ -145,8 +144,8 @@ export function parseProperty(val: any, injectedContext: Context): Function {
         // then call a function which groups all the individual functions under one function call
         return objectOfFunctions(val, injectedContext)
       }
+
   }
-  console.log(val)
 
   return (context: Context) =>
     // eslint-disable-next-line no-new-func

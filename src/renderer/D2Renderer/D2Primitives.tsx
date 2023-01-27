@@ -104,10 +104,6 @@ function rectDrawingCoverter(component: Component) {
 
     for (const prop in component) {
       if (typeof component[prop] === "function") {
-        console.log(prop)
-        console.log(component[prop])
-        console.log(component[prop](event))
-        console.log(typeof component[prop])
         component[prop] = component[prop](event);
       }
     }
