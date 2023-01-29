@@ -117,10 +117,9 @@ function rectDrawingCoverter(component: Component) {
       console.dir(event.type);
     }
 
-    const rect = new PIXI.Graphics()
-    rect
+    g
       .beginFill(
-        event.fill ?? component.fill ?? color ?? 0xff5722,
+        event.fill ?? component.fill ?? color ?? 0x000000,
         event.alpha ?? component.alpha ?? context.alpha)
       .drawRect(
         scale(event.x ?? component.x),
@@ -130,15 +129,31 @@ function rectDrawingCoverter(component: Component) {
       )
       .endFill();
 
-    const buttonText = new PIXI.Text(component.text,
-      {
-        fontFamily: 'Arial',
-        fontSize: 10,
-        fill: "black",
-      });
-    buttonText.y = scale(event.y ?? component.y)
-    buttonText.x = scale(event.x ?? component.x);
-    rect.addChild(buttonText);
-    g.addChild(rect)
+    // FIXME new graphics causing memory leak and render time increase
+    // const rect = new PIXI.Graphics();
+    // rect
+    //   .beginFill(
+    //     event.fill ?? component.fill ?? color ?? 0xff5722,
+    //     event.alpha ?? component.alpha ?? context.alpha)
+    //   .drawRect(
+    //     scale(event.x ?? component.x),
+    //     scale(event.y ?? component.y),
+    //     scale(event.width ?? component.width ?? 1),
+    //     scale(event.height ?? component.height ?? 1)
+    //   )
+    //   .endFill();
+
+    // if (component.text) {
+    //   const buttonText = new PIXI.Text(component.text,
+    //     {
+    //       fontFamily: 'Arial',
+    //       fontSize: 10,
+    //       fill: "black",
+    //     });
+    //   buttonText.y = scale(event.y ?? component.y)
+    //   buttonText.x = scale(event.x ?? component.x);
+    //   rect.addChild(buttonText);
+    // }
+    // g.addChild(rect);
   }
 }

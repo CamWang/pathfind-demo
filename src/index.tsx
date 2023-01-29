@@ -3,10 +3,15 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { View } from './views/View';
+import { Toolbar } from "./components/Toolbar";
+import { PlaybackProvider } from './context/PlaybackContext';
 
 ReactDOM.render(
   <React.StrictMode>
-    <View />
+    <PlaybackProvider>
+      <Toolbar />
+      <View />
+    </PlaybackProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
