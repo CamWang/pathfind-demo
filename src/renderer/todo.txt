@@ -1,10 +1,13 @@
 Current Work Todo
 
-
-[*] Fix the Parser to work for arrays, objects and context.x 
-  (context["parent"][x])
-  ([{"x":"{{x}}", "y":"{{y}}"}, {"x":"{{parent.x}}", "y":"{{parent.y}}"}])
-
 [ ] Work on animation of rendering
 
 [ ] Create merger of eventList information so that delta eventLists will work
+
+[ ] Integrate into Kevins code 
+
+[ ] Contiune on the D2Primitives 
+
+[ ] Work on drawing text onto them in memory efficent ways
+
+[ ] Convert more Search Traces into current format
