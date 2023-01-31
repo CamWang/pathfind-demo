@@ -1,0 +1,44 @@
+{
+  "version": "1.0.3",
+  "render": {
+    "components": {
+      "node": [
+        {
+          "$": "circle",
+          "radius": 1,
+          "x": "{{x}}",
+          "y": "{{y}}"
+        }
+      ],
+      "line": [
+        {
+          "$": "path",
+          "points": [
+            {
+              "x": "{{parent.x}}",
+              "y": "{{parent.y}}"
+            },
+            {
+              "x": "{{x}}",
+              "y": "{{y}}"
+            }
+          ]
+        }
+      ]
+    },
+    "views": {
+      "main": {
+        "renderer": "2d-pixi",
+        "components": [
+          {
+            "$": "node"
+          },
+          {
+            "$": "line"
+          }
+        ]
+      }
+    }
+  },
+  "eventList": []
+}
