@@ -1,5 +1,5 @@
 import { Graphics as GraphicsType, } from "@pixi/graphics";
-import { Component, Event } from "../types";
+import { Component, Event, Point } from "../types";
 import { InstrinsicComponents } from "../PrimitiveComponents"
 import * as PIXI from 'pixi.js';
 
@@ -48,12 +48,66 @@ export const D2InstrinsicComponents: InstrinsicComponents = {
 
 function polygonDrawingCoverter(component: Component) {
 
-  return (g: GraphicsType, event: Event) => {}
+  return (g: GraphicsType, event: Event) => {
+
+    for (const prop in component) {
+      if (typeof component[prop] === "function") {
+        component[prop] = component[prop](event);
+      }
+    }
+
+    let color;
+
+    if (event.type in context.colour) {
+      color = context.colour[event.type as keyof typeof context.colour];
+    }
+    if (!color) {
+      console.dir(event.type);
+    }
+
+    const points = event.points ?? component.points
+
+    points.map((point:Point) => {return {x:scale(point.x), y:scale(point.y)}})
+    
+    g
+      .beginFill(
+        event.fill ?? component.fill ?? color ?? 0x000000,
+        event.alpha ?? component.alpha ?? context.alpha)
+      .drawPolygon(points)
+      .endFill();
+  }
 }
 
 function pathDrawingCoverter(component: Component) {
 
-  return (g: GraphicsType, event: Event) => {}
+  return (g: GraphicsType, event: Event) => {
+
+    for (const prop in component) {
+      if (typeof component[prop] === "function") {
+        component[prop] = component[prop](event);
+      }
+    }
+
+    let color;
+
+    if (event.type in context.colour) {
+      color = context.colour[event.type as keyof typeof context.colour];
+    }
+    if (!color) {
+      console.dir(event.type);
+    }
+
+    const points = event.points ?? component.points
+
+    points.map((point:Point) => {return {x:scale(point.x), y:scale(point.y)}})
+    
+    g
+      .beginFill(
+        event.fill ?? component.fill ?? color ?? 0x000000,
+        event.alpha ?? component.alpha ?? context.alpha)
+      .drawPolygon(points)
+      .endFill();
+  }
 }
 
 function circleDrawingCoverter(component: Component) {

@@ -76,3 +76,8 @@ export type SearchTrace = {
 export type RenderProps = {
   searchTrace: SearchTrace;
 }
+
+export type Point = {
+  x:number,
+  y:number
+}
