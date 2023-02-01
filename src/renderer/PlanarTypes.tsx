@@ -3,7 +3,6 @@ import { Component } from "./types";
 
 type HexColor = `#${string}` | `0x${string}` | number;
 
-// TODO Runtime type check for components and event data?
 /**
  * Type definitions for components just for reference
  * Not enforced by the program during runtime

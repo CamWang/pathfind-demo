@@ -23,9 +23,6 @@ const isToppedEventType = (type: string) => {
 }
 
 export function D2Renderer({ parsedComps }: D2RendererProps) {
-  /**
-   * TODO style the source and destination node
-   */
   const drawInstructions = parsedComps["components"].map((ele: Component) => {
     return D2InstrinsicComponents[ele["$"]]["converter"](ele);
   });
@@ -49,7 +46,6 @@ export function D2Renderer({ parsedComps }: D2RendererProps) {
   }, []);
 
   const draw = useCallback((g: GraphicsType) => {
-    g.clear();
     if (trace.length !== 0) {
       const topEvents: Event[] = [];
       for (const event of trace) {
