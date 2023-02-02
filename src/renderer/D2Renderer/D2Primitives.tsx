@@ -1,4 +1,5 @@
-import { Graphics as GraphicsType, } from "@pixi/graphics";
+import { Graphics as GraphicsType } from "@pixi/graphics";
+import { BitmapText } from "@pixi/text-bitmap";
 import { Component, Event, Point } from "../types";
 import { InstrinsicComponents } from "../PrimitiveComponents"
 import * as PIXI from 'pixi.js';
@@ -152,6 +153,7 @@ function circleDrawingCoverter(component: Component) {
   }
 }
 
+const items = ["A", "B", "C", "D"];
 function rectDrawingCoverter(component: Component) {
 
   return (g: GraphicsType, event: Event) => {
@@ -170,44 +172,34 @@ function rectDrawingCoverter(component: Component) {
     if (!color) {
       console.dir(event.type);
     }
+    const [x, y, w, h] = [
+      scale(event.x ?? component.x), 
+      scale(event.y ?? component.y),
+      scale(event.width ?? component.width ?? 1),
+      scale(event.height ?? component.height ?? 1)
+    ];
 
     g
       .beginFill(
         event.fill ?? component.fill ?? color ?? 0x000000,
         event.alpha ?? component.alpha ?? context.alpha)
-      .drawRect(
-        scale(event.x ?? component.x),
-        scale(event.y ?? component.y),
-        scale(event.width ?? component.width ?? 1),
-        scale(event.height ?? component.height ?? 1)
-      )
+      .drawRect(x, y, w, h)
       .endFill();
 
-    // FIXME new graphics causing memory leak and render time increase
-    // const rect = new PIXI.Graphics();
-    // rect
-    //   .beginFill(
-    //     event.fill ?? component.fill ?? color ?? 0xff5722,
-    //     event.alpha ?? component.alpha ?? context.alpha)
-    //   .drawRect(
-    //     scale(event.x ?? component.x),
-    //     scale(event.y ?? component.y),
-    //     scale(event.width ?? component.width ?? 1),
-    //     scale(event.height ?? component.height ?? 1)
-    //   )
-    //   .endFill();
+    component.text = items[Math.floor(Math.random() * items.length)];
 
-    // if (component.text) {
-    //   const buttonText = new PIXI.Text(component.text,
-    //     {
-    //       fontFamily: 'Arial',
-    //       fontSize: 10,
-    //       fill: "black",
-    //     });
-    //   buttonText.y = scale(event.y ?? component.y)
-    //   buttonText.x = scale(event.x ?? component.x);
-    //   rect.addChild(buttonText);
-    // }
-    // g.addChild(rect);
+    if (component.text) {
+      const text = new PIXI.Text(component.text,
+        {
+          fontFamily: 'Arial',
+          fontSize: 10,
+          fill: "black",
+        });
+      text.y = y + (h / 2);
+      text.x = x + (w / 2);
+      text.anchor.set(0.5);
+
+      g.addChild(text);
+    }
   }
 }

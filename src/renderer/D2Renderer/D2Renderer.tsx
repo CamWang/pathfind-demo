@@ -1,5 +1,6 @@
 import { Graphics, Stage } from "@inlet/react-pixi";
-import { Graphics as GraphicsType, } from "@pixi/graphics";
+import * as PIXI from 'pixi.js';
+import {Graphics as GraphicsType } from "@pixi/graphics";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Component, Event, View } from "../types";
 import { DrawingInstruction } from "../PrimitiveComponents"
@@ -38,7 +39,16 @@ export function D2Renderer({ parsedComps }: D2RendererProps) {
     return []
   }, [playbackContext]);
 
+  /**
+   * Initialization for D2Renderer
+   */
   useEffect(() => {
+    PIXI.BitmapFont.from('TitleFont', {
+      fontFamily: 'Arial',
+      fontSize: 12,
+      strokeThickness: 2,
+      fill: 'purple',
+    });
     window.addEventListener("resize", () => {
       setWidth(window.innerWidth);
       setHeight(window.innerHeight);
@@ -46,6 +56,9 @@ export function D2Renderer({ parsedComps }: D2RendererProps) {
   }, []);
 
   const draw = useCallback((g: GraphicsType) => {
+    g.clear();
+    g.removeChildren();
+    
     if (trace.length !== 0) {
       const topEvents: Event[] = [];
       for (const event of trace) {

@@ -35,7 +35,6 @@ export function PlaybackProvider(props: PlaybackProviderProps) {
 
   const trace = useMemo(() => {
     const newMap = traceJson.eventList.slice(start, step);
-    console.log("new trace: " + newMap.length);
     return newMap;
   }, [start, step]);
   

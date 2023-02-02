@@ -1,13 +1,15 @@
 Current Work Todo
 
-[ ] Work on animation of rendering
-
 [ ] Create merger of eventList information so that delta eventLists will work
 
-[ ] Integrate into Kevins code 
+[ ] Convert more Search Traces into current format
 
-[ ] Contiune on the D2Primitives 
+[ ] Create a stage for the PIXI renderer - renderer
+
+[ ] Nodelist and LazyNodelist
+
+[ ] An Context system for intermediate language - parser
+
+[ ] Window system for multiple views
 
 [ ] Work on drawing text onto them in memory efficent ways
-
-[ ] Convert more Search Traces into current format
