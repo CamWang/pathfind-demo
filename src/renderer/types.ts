@@ -1,5 +1,5 @@
 export type Event = {
-  type: string;
+  type: keyof Colours;
   id: number;
   pid?: number;
   g?: number;

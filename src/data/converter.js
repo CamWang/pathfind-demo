@@ -1391,15 +1391,15 @@ const tile_events = {
   ]
 }
 
-export function converter(){
+function converter(){
   const newEventList = [];
-  const array = ["11", "21", "31", "12", "22", "32", "13", "23", "33"]
+  const array = [ "33", "11", "21", "31", "12", "22", "32", "13", "23"]
   for (const eventName in tile_events.eventList){
     let currentEvent = tile_events.eventList[eventName]
-    const newObject:{[key: string] : any} = {}
-    let counter = 1
+    const newObject = {}
+    let counter = 0
     for (const x of array){
-      newObject[x] = currentEvent["state_variables"]["overrideDefaultValues"][`n${counter}` as keyof object]
+      newObject[x] = currentEvent["state_variables"]["overrideDefaultValues"][`n${counter}`]
         counter += 1
     }
 

@@ -147,10 +147,12 @@ export function parseProperty(val: any, injectedContext: Context): Function {
 
   }
 
+  const funcTemp = Function("context", `return ${val}`)
+
   return (context: Context) =>
     // eslint-disable-next-line no-new-func
-    Function("context", `return ${val}`)
-      ({ ...injectedContext, ...context }) // This combines the two contexts and overridees the injectedContext if duplicate properties
+    funcTemp({ ...injectedContext, ...context }) 
+    // This combines the two contexts and overridees the injectedContext if duplicate properties
 }
 
 /**
