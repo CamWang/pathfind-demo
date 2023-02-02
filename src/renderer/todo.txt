@@ -5,10 +5,18 @@ Current Work Todo
 [ ] Convert more Search Traces into current format
 
 [ ] Create a stage for the PIXI renderer - renderer
+- takes in the intermediate language
+- provide add/delete function for each child nodelist
 
 [ ] Nodelist and LazyNodelist
+- generic for stages/renderers
+- caching the nodes
+- use the add/delete function to 
 
 [ ] An Context system for intermediate language - parser
+- something like a speciman context
+- takes in the search trace
+- provide intermediate language for the renderer
 
 [ ] Window system for multiple views
 
