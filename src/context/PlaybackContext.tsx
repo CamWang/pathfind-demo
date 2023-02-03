@@ -1,5 +1,6 @@
 import { createContext, useState, useMemo, useEffect, useCallback } from "react";
-import traceJson from "../data/grid-astar.trace.json";
+// import traceJson from "../data/grid-astar.trace.json";
+import traceJson from "../data/road-astar.trace.json"
 import {Event} from "./types";
 
 type PlaybackProviderProps = {

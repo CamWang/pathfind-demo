@@ -83,6 +83,9 @@ export function D2Renderer({ parsedComps }: D2RendererProps) {
   return (
     <Stage height={height} width={width} options={{ backgroundAlpha: 0 }} >
       <Graphics draw={draw} />
+      <Graphics draw={draw} />
+      <Graphics draw={draw} />
+      <Graphics draw={draw} />
     </Stage>
   )
 }

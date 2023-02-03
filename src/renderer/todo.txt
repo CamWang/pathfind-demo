@@ -21,3 +21,11 @@ Current Work Todo
 [ ] Window system for multiple views
 
 [ ] Work on drawing text onto them in memory efficent ways
+
+[ ] Performance optimize
+- create algorithm reduce the graphics objects in lazynodelist
+
+
+? support for text in a large search trace map
+? thoughts on the window system
+? 

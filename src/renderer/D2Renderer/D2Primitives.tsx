@@ -178,28 +178,55 @@ function rectDrawingCoverter(component: Component) {
       scale(event.width ?? component.width ?? 1),
       scale(event.height ?? component.height ?? 1)
     ];
+    component.text="A";
 
-    g
+    const rect = new PIXI.Graphics();
+    rect
       .beginFill(
-        event.fill ?? component.fill ?? color ?? 0x000000,
+        event.fill ?? component.fill ?? color ?? 0xff5722,
         event.alpha ?? component.alpha ?? context.alpha)
-      .drawRect(x, y, w, h)
+      .drawRect(
+        scale(event.x ?? component.x),
+        scale(event.y ?? component.y),
+        scale(event.width ?? component.width ?? 1),
+        scale(event.height ?? component.height ?? 1)
+      )
       .endFill();
 
-    component.text = items[Math.floor(Math.random() * items.length)];
-
     if (component.text) {
-      const text = new PIXI.Text(component.text,
+      const buttonText = new PIXI.Text(component.text,
         {
           fontFamily: 'Arial',
           fontSize: 10,
           fill: "black",
         });
-      text.y = y + (h / 2);
-      text.x = x + (w / 2);
-      text.anchor.set(0.5);
-
-      g.addChild(text);
+      buttonText.y = scale(event.y ?? component.y)
+      buttonText.x = scale(event.x ?? component.x);
+      rect.addChild(buttonText);
     }
+    g.addChild(rect);
+
+    // g
+    //   .beginFill(
+    //     event.fill ?? component.fill ?? color ?? 0x000000,
+    //     event.alpha ?? component.alpha ?? context.alpha)
+    //   .drawRect(x, y, w, h)
+    //   .endFill();
+
+    // component.text = items[Math.floor(Math.random() * items.length)];
+
+    // if (component.text) {
+    //   const text = new PIXI.Text(component.text,
+    //     {
+    //       fontFamily: 'Arial',
+    //       fontSize: 10,
+    //       fill: "black",
+    //     });
+    //   text.y = y + (h / 2);
+    //   text.x = x + (w / 2);
+    //   text.anchor.set(0.5);
+
+      // g.addChild(text);
+    // }
   }
 }
